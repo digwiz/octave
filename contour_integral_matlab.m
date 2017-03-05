@@ -1,4 +1,4 @@
-function result = contour_integral_meters(freq, x_in, y_in, x1, x2, y1, y2, func)
+function result = contour_integral_matlab(freq, x_in, y_in, x1, x2, y1, y2, func)
 
 line_length = sqrt((x2 - x1).^2 + (y2 - y1).^2);
 wavelen = (3e+8)./(freq);
@@ -18,7 +18,7 @@ x_term = x2 - x1;
 y_term = y2 - y1;
 
 for i=1:5
- sum = sum + weights(i).*func(k_val.*sqrt((x_in - 0.1 - x_term.*nodes(i)).^2 + (y_in - 0.1 - y_term.*nodes(i)).^2));
+ sum = sum + weights(i).*func(k_val.*sqrt((x_in - x1 - x_term.*nodes(i)).^2 + (y_in - y1 - y_term.*nodes(i)).^2));
 end
 
 result = const_term.*sum;
