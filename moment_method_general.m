@@ -1,4 +1,4 @@
-function [segment_array,z_array,v_column,midpoint_array] = i_vector(freq, J_nought, num_segments, ls_y, ls_z, obs_y, obs_z, func, varargin)
+function [i_column] = i_vector(freq, J_nought, num_segments, ls_y, ls_z, obs_y, obs_z, func, varargin)
 
 %num_segments is the number of segments to divide each part of the shape
 %into, not the whole shape perimeter
@@ -80,5 +80,13 @@ for m=1:total_segments
     
 z_array = z_mn_matrix;
 v_column = v_m_matrix;
+i_column = z_array\v_column;
+
+e_scat = 0;
+
+for iteration=1:total_segments
+    e_scat = e_scat + i_column(iteration,1).*contour_integral_matlab(freq,y_obs,z_obs,segment_array(iteration,1),segment_array(iteration,2),segment_array(iteration,3),segment_array(iteration,4));
+end
+
 end
     
