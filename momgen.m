@@ -1,4 +1,4 @@
-function [i_column] = momgen(freq, J_nought, num_segments, ls_y, ls_z, obs_y, obs_z, func, varargin)
+function [e_total] = momgen(freq, J_nought, num_segments, ls_y, ls_z, obs_y, obs_z, func, varargin)
 
 %num_segments is the number of segments to divide each part of the shape
 %into, not the whole shape perimeter
@@ -10,6 +10,11 @@ function [i_column] = momgen(freq, J_nought, num_segments, ls_y, ls_z, obs_y, ob
 %and end y-values of the upper plate, while z1 and z2 are the beginning and
 %end z-values of the upper plate. The second row would consist of the
 %values for the lower plate.
+
+mu_nought = pi.*4e-7;
+ang_freq = 2.*pi.*freq;
+wavelen = (3e+8)./(freq);
+k_val = 2.*pi./wavelen;
 
 num_shapes=length(varargin);
 total_segments = num_segments.*num_shapes;
@@ -77,16 +82,19 @@ for m=1:total_segments
             v_m_matrix(m,1) = v_m(freq, J_nought, midpoint_array(m,1), midpoint_array(m,2), ls_y, ls_z, func);
         end
     end
+end
     
 z_array = z_mn_matrix;
 v_column = v_m_matrix;
 i_column = z_array\v_column;
 
 e_scat = 0;
-
+obs_dist = sqrt((ls_y-obs_y).^2+(ls_z-obs_z).^2);
+e_inc = -1.*ang_freq.*mu_nought.*func(k_val.*obs_dist);
 for iteration=1:total_segments
-    e_scat = e_scat + i_column(iteration,1).*contour_integral_matlab(freq,y_obs,z_obs,segment_array(iteration,1),segment_array(iteration,2),segment_array(iteration,3),segment_array(iteration,4));
+    e_scat = e_scat + i_column(iteration,1).*contour_integral_matlab(freq,obs_y,obs_z,segment_array(iteration,1),segment_array(iteration,2),segment_array(iteration,3),segment_array(iteration,4),func); 
 end
 
+e_total=abs(e_scat + e_inc);
 end
     
