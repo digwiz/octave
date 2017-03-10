@@ -51,8 +51,8 @@ end
 
 midpoint_array = zeros(total_segments, 2);
 
-z_mn_matrix = zeros(num_segments, num_segments);
-v_m_matrix = zeros(num_segments, 1);
+z_mn_matrix = zeros(total_segments, total_segments);
+v_m_matrix = zeros(total_segments, 1);
 
 for iteration=1:total_segments
     midpoint_array(iteration, 1) = (segment_array(iteration, 1) + segment_array(iteration,2))./2;
@@ -67,11 +67,12 @@ for m=1:total_segments
             midpoint1_z = (segment_array(n,3) + midpoint_array(n,2))./2;
             midpoint2_y = (segment_array(n,2) + midpoint_array(n,1))./2;
             midpoint2_z = (segment_array(n,4) + midpoint_array(n,2))./2;
-            
+            %line_length1 = sqrt((segment_array(n,2) - midpoint_array(n,1)).^2 + (segment_array(n, 3) - midpoint_array(n, 2).^2));
+            %line_length2 = sqrt((midpoint_array(n,1) - segment_array(n, 2)).^2 + (midpoint_array(n, 2) - segment_array(n, 4).^2));
             zmn_half1 = z_mn(freq, midpoint1_y, midpoint1_z, segment_array(n, 1), midpoint_array(n,1), segment_array(n, 3), midpoint_array(n, 2), func);
             zmn_half2 = z_mn(freq, midpoint2_y, midpoint2_z, midpoint_array(n,1), segment_array(n, 2), midpoint_array(n, 2), segment_array(n, 4), func);
             
-            z_mn_matrix(m,n) = zmn_half1 + zmn_half2;
+            z_mn_matrix(m,n) = (zmn_half1 + zmn_half2);
             
             vm_half1 = v_m(freq, J_nought, midpoint1_y, midpoint1_z, ls_y, ls_z, func);
             vm_half2 = v_m(freq, J_nought, midpoint2_y, midpoint2_z, ls_y, ls_z, func);
@@ -86,11 +87,11 @@ end
     
 z_array = z_mn_matrix;
 v_column = v_m_matrix;
-i_column = z_array\v_column;
+i_column = inv(z_array)*v_column;
 
 e_scat = 0;
-obs_dist = sqrt((ls_y-obs_y).^2+(ls_z-obs_z).^2);
-e_inc = -1.*ang_freq.*mu_nought.*func(k_val.*obs_dist);
+obs_dist = sqrt((obs_y-ls_y).^2+(obs_z-ls_z).^2);
+e_inc = -1.*ang_freq.*mu_nought.*J_nought.*func(k_val.*obs_dist)./4;
 for iteration=1:total_segments
     e_scat = e_scat + i_column(iteration,1).*contour_integral_matlab(freq,obs_y,obs_z,segment_array(iteration,1),segment_array(iteration,2),segment_array(iteration,3),segment_array(iteration,4),func); 
 end
