@@ -1,7 +1,16 @@
+%frequency = input frequency in Hz
+%J_nought = input current density
+%num_segments = the number of segments to divide each input shape into
+%ls_y, ls_z = line source location in the y-z plane
+%obs_y, obs_z = observation point location in the y-z plane
+%func = the input function - in this case besselh(0,2,x)
+%varargin = variable-length input list containing the vectors that
+%represent the scatterer shapes
+
 function [e_total] = momgen(freq, J_nought, num_segments, ls_y, ls_z, obs_y, obs_z, func, varargin)
 
 %num_segments is the number of segments to divide each part of the shape
-%into, not the whole shape perimeter
+%into, not the combined shape
 
 %shape array holds 4-element vectors in each row that correspond to the
 %beginning and end points of each part of the shape. For example, if the
