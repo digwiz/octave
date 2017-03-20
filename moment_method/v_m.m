@@ -7,6 +7,7 @@ mu_nought = pi.*4e-7;
 
 const_term = -1.*ang_freq.*mu_nought.*J_nought./4;
 
+%this expression computes a single cell of the column v_m (6.3-22)
 v_m = -1.*const_term.*func(k_val.*sqrt((tau_m_y - tau_ls_y).^2 + (tau_m_z - tau_ls_z).^2));
 
 end

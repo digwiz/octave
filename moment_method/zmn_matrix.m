@@ -1,5 +1,8 @@
 function zmn_mat = zmn_matrix(total_segments, segment_array, midpoint_array, freq, func)
 
+
+%this file computes the whole matrix of the expression (6.3-24), as given 
+%in the formulation and returns it in the variable zmn_mat
 for m=1:total_segments
     for n=1:total_segments
         if m == n
@@ -14,11 +17,8 @@ for m=1:total_segments
 
             z_mn_matrix(m,n) = (zmn_half1 + zmn_half2);
 
-            %v_m_matrix(m,1) = v_m(freq, J_nought, midpoint_array(m,1), midpoint_array(m,2), ls_y, ls_z, func);
-
         else
             z_mn_matrix(m,n) = z_mn(freq, midpoint_array(m,1), midpoint_array(m,2), segment_array(n,1), segment_array(n,2), segment_array(n,3), segment_array(n,4), func);
-            %v_m_matrix(m,1) = v_m(freq, J_nought, midpoint_array(m,1), midpoint_array(m,2), ls_y, ls_z, func);
         end
     end
 end

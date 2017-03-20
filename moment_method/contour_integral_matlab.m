@@ -1,3 +1,6 @@
+%contour_integral_matlab is the general expression for computing 2-D
+%Gauss-MRW solutions to the free space Green's function integral
+
 function result = contour_integral_matlab(freq, x_in, y_in, x1, x2, y1, y2, func)
 
 line_length = sqrt((x2 - x1).^2 + (y2 - y1).^2);

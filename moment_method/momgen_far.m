@@ -1,6 +1,3 @@
-%Note: matching to specific expressions is done in the individual files
-%that this code calls
-
 %frequency = input frequency in Hz
 %J_nought = input current density
 %num_segments = the number of segments to divide each input shape into
@@ -10,7 +7,7 @@
 %varargin = variable-length input list containing the vectors that
 %represent the scatterer shapes
 
-function [e_total] = momgen(freq, J_nought, num_segments, ls_y, ls_z, obs_y, obs_z, func, varargin)
+function [e_total] = momgen_far(freq, J_nought, num_segments, ls_y, ls_z, obs_y, obs_z, func, varargin)
 
 %num_segments is the number of segments to divide each part of the shape
 %into, not the combined shape
@@ -67,16 +64,26 @@ i_column = z_array\v_column;
 e_scat = 0;
 
 %calculate the distance between the observation point and the line source
-obs_dist = sqrt((obs_y-ls_y).^2+(obs_z-ls_z).^2);
+obs_dist = sqrt(obs_y.^2 + obs_z.^2);
+obs_phi = atan(obs_y./obs_z);
 
+ls_dist = sqrt(ls_y.^2 + ls_z.^2);
+ls_phi = atan(ls_y./ls_z);
 %calculate the incident field of the line source
-e_inc = -1.*ang_freq.*mu_nought.*J_nought.*func(k_val.*obs_dist)./4;
+e_inc = -1i.*ang_freq.*mu_nought.*(1./sqrt(8.*1i.*pi.*k_val)).*J_nought.*exp(1i.*k_val.*ls_dist.*cos(obs_phi-ls_phi)).*exp(-1i.*k_val.*obs_dist)./sqrt(obs_dist);
 
 %sum up the scattered field contributions of each segment
 for iteration=1:total_segments
-    e_scat = e_scat + i_column(iteration,1).*contour_integral_matlab(freq,obs_y,obs_z,segment_array(iteration,1),segment_array(iteration,2),segment_array(iteration,3),segment_array(iteration,4),func);
+    segment_length = sqrt((segment_array(iteration,1) - segment_array(iteration,2)).^2 + (segment_array(iteration,3) - segment_array(iteration,4)).^2);
+    exp_term1 = exp(1i.*k_val.*segment_array(iteration,3).*cos(obs_phi));
+    exp_term2 = exp(1i.*k_val.*segment_array(iteration,1).*sin(obs_phi));
+    
+    potential_term = (1./sqrt(8.*1i.*pi.*k_val)).*(exp(-1i.*k_val.*obs_dist)./sqrt(obs_dist)).*segment_length.*exp_term1.*exp_term2;
+    
+    integral_func = @(x) exp(1i.*k_val.*(segment_array(iteration,4)-segment_array(iteration,2)).*x.*cos(obs_phi)+1i.*k_val.*(segment_array(iteration,3)-segment_array(iteration,1)).*x.*sin(obs_phi));
+    e_scat = e_scat + i_column(iteration,1).*potential_term.*integral(integral_func,0,1)
 end
 
 %set the return value equal to the absolute value of e_scat + e_inc
-e_total=abs(e_scat + e_inc);
+e_total=abs(e_scat + e_inc)./421.4889;
 end
