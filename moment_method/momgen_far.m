@@ -80,7 +80,7 @@ for iteration=1:total_segments
     
     potential_term = (1./sqrt(8.*1i.*pi.*k_val)).*(exp(-1i.*k_val.*obs_dist)./sqrt(obs_dist)).*segment_length.*exp_term1.*exp_term2;
     
-    integral_func = @(x) exp(1i.*k_val.*(segment_array(iteration,4)-segment_array(iteration,2)).*x.*cos(obs_phi)+1i.*k_val.*(segment_array(iteration,3)-segment_array(iteration,1)).*x.*sin(obs_phi));
+    integral_func = @(x) exp(1i.*k_val.*(segment_array(iteration,2)-segment_array(iteration,1)).*x.*cos(obs_phi)+1i.*k_val.*(segment_array(iteration,4)-segment_array(iteration,3)).*x.*sin(obs_phi));
     e_scat = e_scat + i_column(iteration,1).*potential_term.*integral(integral_func,0,1)
 end
 
