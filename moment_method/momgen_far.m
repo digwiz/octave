@@ -78,12 +78,15 @@ for iteration=1:total_segments
     exp_term1 = exp(1i.*k_val.*segment_array(iteration,3).*cos(obs_phi));
     exp_term2 = exp(1i.*k_val.*segment_array(iteration,1).*sin(obs_phi));
     
-    potential_term = (1./sqrt(8.*1i.*pi.*k_val)).*(exp(-1i.*k_val.*obs_dist)./sqrt(obs_dist)).*segment_length.*exp_term1.*exp_term2;
+    potential_term = (mu_nought./sqrt(8.*1i.*pi.*k_val)).*(exp(-1i.*k_val.*obs_dist)./sqrt(obs_dist)).*segment_length.*exp_term1.*exp_term2;
     
-    integral_func = @(x) exp(1i.*k_val.*(segment_array(iteration,2)-segment_array(iteration,1)).*x.*cos(obs_phi)+1i.*k_val.*(segment_array(iteration,4)-segment_array(iteration,3)).*x.*sin(obs_phi));
-    e_scat = e_scat + i_column(iteration,1).*potential_term.*integral(integral_func,0,1)
+    integral_func = @(x,seg_y1,seg_y2,seg_z1,seg_z2)exp(1i.*k_val.*(seg_y2-seg_y1).*x.*cos(obs_phi)).*exp(1i.*k_val.*(seg_z2-seg_z1).*x.*sin(obs_phi));
+    %integral_func = @(x) exp(1i.*k_val.*(segment_array(iteration,2)-segment_array(iteration,1)).*x.*cos(obs_phi)+1i.*k_val.*(segment_array(iteration,4)-segment_array(iteration,3)).*x.*sin(obs_phi));
+    e_scat = e_scat + -1i.*ang_freq.*i_column(iteration,1).*potential_term.*integral(@(x)integral_func(x,segment_array(iteration,1),segment_array(iteration,2),segment_array(iteration,3),segment_array(iteration,4)),0,1);
+    %e_scat = e_scat + i_column(iteration,1).*potential_term.*integral(integral_func,0,1)
 end
 
 %set the return value equal to the absolute value of e_scat + e_inc
-e_total=abs(e_scat + e_inc)./421.4889;
+e_total=abs(e_scat + e_inc);
+
 end
