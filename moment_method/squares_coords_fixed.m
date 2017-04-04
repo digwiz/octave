@@ -113,9 +113,6 @@ for iter=1:(squares_thick-1)
     for it=1:num_squares_to_add
         %squares(squares_count+1) = square_corners(new_first_x,new_first_y-edge_length.*(iter-1),edge_length);
         
-        if new_first_x < (2.*F-thickness)
-            break;
-        end
          %upper-right coords
         squares(squares_count+1,1,1) = new_first_x;
         squares(squares_count+1,2,1) = new_first_y-edge_length.*(it-1);
