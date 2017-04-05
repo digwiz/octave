@@ -18,14 +18,27 @@
 
 function [squares_column, centers_column] = squares_coords_fixed(width, F, e_r, num_width_splits)
 
-psi_max_val = psi_max(e_r,F,width);
+%calculate maximum psi value
+psi_max_val = psi_max2(e_r,F,width);
+
+%get maximum rho from maximum psi
 rho_max = lens_rho(psi_max_val,e_r,F);
+
+%calculate first x and y from max rho and max psi
 [first_x, first_y] = lens_curve_xy(rho_max, psi_max_val);
 
+%max_x is used to calculate relevant x values later
 max_x = first_x;
-%thickness = rho_max.*cos(psi_max_val) - F;
-thickness = max_x - F;
+
+%lens_rho(0,e_r,F) is just the value F, and thickness should be max_x - F
+thickness = max_x - lens_rho(0,e_r,F);
+
+%the edge length of a square should equal the width of the lens divided by
+%the number of squares to split the width into
 edge_length = width./num_width_splits;
+
+%squares_thick is the number of columns of squares to use to approximate
+%the lens
 squares_thick = floor(thickness./edge_length);
 total_squares = 0;
 
@@ -34,15 +47,16 @@ for iter=1:num_width_splits
 end
 
 for iter=1:(squares_thick-1)
-    %new_rho = sqrt(e_r).*(rho_max.*cos(psi_max_val) - iter.*edge_length) - (sqrt(e_r)-1).*F;
+    %the top-right x-coordinate for the first square in the new column is
+    %equal to the maximum x value minus the number of columns already added
     new_first_x = max_x-iter.*edge_length;
-    %new_first_y = sqrt(new_rho.^2 - new_first_x.^2);
-    %new_psi = atan(new_first_y./new_first_x);
-    %new_psi = acos(((sqrt(e_r)-1).*F+new_rho)./(new_rho.*e_r));
-    new_psi = abs(psi_given_x(e_r,F,new_first_x,iter.*edge_length));
+    
+    %calculate the new psi value using the expression for rho as a function
+    %of psi
+    new_psi = abs(psi_given_x(e_r,F,new_first_x,iter,edge_length));
     new_rho = lens_rho(new_psi,e_r,F);
-    new_first_y = new_rho.*sin(new_psi);
-    %new_first_y = new_rho.*sin(current_psi(e_r,F,rho_max.*cos(psi_max_val),iter.*edge_length));
+    %new_first_y = new_rho.*sin(new_psi);
+    new_first_y = abs(hyperbola_y(max_x, iter.*edge_length));
     new_total_width = new_first_y.*2;
     num_squares_to_add = floor(new_total_width./edge_length);
     total_squares = total_squares + num_squares_to_add;
@@ -94,17 +108,11 @@ end
 %total width of the column, and then divide that by edge_length to determine 
 %how many squares to add to the column.
 for iter=1:(squares_thick-1)
-    %new_rho = sqrt(e_r).*(rho_max.*cos(psi_max_val) - iter.*edge_length) - (sqrt(e_r)-1).*F;
     new_first_x = max_x-iter.*edge_length;    
-    
-    
-    %new_first_y = sqrt(new_rho.^2 - new_first_x.^2);
-    %new_psi = atan(new_first_y./new_first_x);
-    %new_psi = acos(((sqrt(e_r)-1).*F+new_rho)./(new_rho.*e_r));
-    new_psi = abs(psi_given_x(e_r,F,new_first_x,iter.*edge_length));
+    new_psi = abs(psi_given_x(e_r,F,new_first_x,iter,edge_length));
     new_rho = lens_rho(new_psi,e_r,F);
-    new_first_y = new_rho.*sin(new_psi);
-    %new_first_y = new_rho.*sin(current_psi(e_r,F,rho_max.*cos(psi_max_val),iter.*edge_length));
+    %new_first_y = new_rho.*sin(new_psi);
+    new_first_y = abs(hyperbola_y(max_x, iter.*edge_length));
     new_total_width = new_first_y.*2;
     num_squares_to_add = floor(new_total_width./edge_length);
 
