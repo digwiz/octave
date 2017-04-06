@@ -1,20 +1,18 @@
 %The function squares_coords creates a column vector that contains 2x4 
 %matrices that represent the x- and y-coordinates of each square,
-%effectively making squares_coords an 3-dimensional matrix where the third
-%dimension depends on the width of the lens and how many squares the user
+%effectively making squares_coords an 3-dimensional array where the first
+%dimension depends on the width of the lens, and how many squares the user
 %desires the width to correspond to. 
 
 %Note that the floor() function is used to make the number of squares for 
 %each row into a whole number; it is intended to rely on a relatively high 
 %number for num_width_splits in order to compensate for this rounding. At 
 %lower values, it is possible that the approximate lens created by this 
-%function would look somewhat lopsided.
-
-%This function is best used when called by another function that defines
-%the x- and y-coordinates of the first square from a polar-coordinate
-%representation of the hyperbola or other curves for the lens, since the
-%thickness is dependent upon the equation for the hyperbola as well as the
-%focal length of the lens, which is not part of this function
+%function would look somewhat lopsided. Additionally, the floor function
+%means that the code cannot currently handle fractional inputs; however,
+%given the nature of the expressions used, this should not matter, as the
+%width and F (and thus all derived quantities) can be specified in m, cm,
+%mm, etc. without issue.
 
 function [squares_column, centers_column] = squares_coords_fixed(width, F, e_r, num_width_splits)
 
@@ -46,23 +44,28 @@ for iter=1:num_width_splits
     total_squares = total_squares + 1;
 end
 
+%note that all of the values in the following for loop are calculated
+%twice - once solely to determine the total number of squares to use to
+%approximate the lens, and again to actually fill the lens array. This is
+%done to avoid exponential run time increases that would occur if the array
+%was resized repeatedly - as it would be if the calculations were only done
+%once
 for iter=1:(squares_thick-1)
     %the top-right x-coordinate for the first square in the new column is
     %equal to the maximum x value minus the number of columns already added
     new_first_x = max_x-iter.*edge_length;
     
-    %calculate the new psi value using the expression for rho as a function
-    %of psi
-    new_psi = abs(psi_given_x(e_r,F,new_first_x,iter,edge_length));
-    new_rho = lens_rho(new_psi,e_r,F);
-    %new_first_y = new_rho.*sin(new_psi);
+    %calculate the y-value for the new first square's top-right corner
     new_first_y = abs(hyperbola_y(max_x, iter.*edge_length));
+    
+    %get the height of the new column of squares
     new_total_width = new_first_y.*2;
+    
     num_squares_to_add = floor(new_total_width./edge_length);
     total_squares = total_squares + num_squares_to_add;
 end
 
-%page, column, row, where each page represents a whole square,  
+%page, column, row, where each page represents a whole square
 squares = zeros(total_squares, 2, 4);
 squares_centers = zeros(total_squares, 1, 2);
 
@@ -76,7 +79,6 @@ squares_count = 0;
 %decrement the y-coordinate by edge_length.*(iter-1) to get the upper-right
 %coordinates of each consecutive square.
 for iter=1:num_width_splits
-    %squares(squares_count+1) = square_corners(first_x,first_y-edge_length.*(iter-1), edge_length);
     %upper-right coords
     squares(squares_count+1,1,1) = first_x;
     squares(squares_count+1,2,1) = first_y-edge_length.*(iter-1);
@@ -93,8 +95,6 @@ for iter=1:num_width_splits
     squares(squares_count+1,1,4) = first_x;
     squares(squares_count+1,2,4) = first_y-edge_length.*(iter-1)-edge_length;
     
-    %squares_centers(squares_count+1) = square_centroid(first_x,first_y-edge_length.*(iter-1), edge_length);
-    
     squares_centers(squares_count+1,1,1) = first_x+edge_length./2;
     squares_centers(squares_count+1,1,2) = first_y-edge_length.*(iter-1)-edge_length./2;
     
@@ -109,9 +109,7 @@ end
 %how many squares to add to the column.
 for iter=1:(squares_thick-1)
     new_first_x = max_x-iter.*edge_length;    
-    new_psi = abs(psi_given_x(e_r,F,new_first_x,iter,edge_length));
-    new_rho = lens_rho(new_psi,e_r,F);
-    %new_first_y = new_rho.*sin(new_psi);
+
     new_first_y = abs(hyperbola_y(max_x, iter.*edge_length));
     new_total_width = new_first_y.*2;
     num_squares_to_add = floor(new_total_width./edge_length);
@@ -119,9 +117,8 @@ for iter=1:(squares_thick-1)
     %For each other column of squares, add each square's coordinates to the
     %column, and increment squares_count.
     for it=1:num_squares_to_add
-        %squares(squares_count+1) = square_corners(new_first_x,new_first_y-edge_length.*(iter-1),edge_length);
         
-         %upper-right coords
+        %upper-right coords
         squares(squares_count+1,1,1) = new_first_x;
         squares(squares_count+1,2,1) = new_first_y-edge_length.*(it-1);
 
@@ -140,14 +137,12 @@ for iter=1:(squares_thick-1)
         squares_centers(squares_count+1,1,1) = new_first_x+edge_length./2;
         squares_centers(squares_count+1,1,2) = new_first_y-edge_length.*(it-1)-edge_length./2;
         
-        %squares_centers(squares_count+1) = square_corners(new_first_x,new_first_y-edge_length.*(iter-1),edge_length);
         squares_count = squares_count + 1;
         
     end
 end
 
-%for iter=1:squares_count
-%    if squares(iter,1,1) < 
+%return the calculated squares coordinates
 squares_column = squares;
 centers_column = squares_centers;
 end
