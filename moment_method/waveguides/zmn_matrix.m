@@ -3,6 +3,8 @@ function zmn_mat = zmn_matrix(total_segments, segment_array, midpoint_array, fre
 
 %this file computes the whole matrix of the expression (6.3-24), as given 
 %in the formulation and returns it in the variable zmn_mat
+z_mn_matrix = zeros(total_segments,total_segments);
+
 for m=1:total_segments
     for n=1:total_segments
         if m == n
